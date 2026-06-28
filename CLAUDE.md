@@ -1,228 +1,253 @@
-# Asiringui · osiris-menu-fe
+CLAUDE.md · osiris-menu-fe
 
-Sistema operativo integral del restaurante-cervecería Asiringui, en Cuenca, Ecuador. Este repo contiene el **frontend** del sistema. El backend vive en el repo `osiris-menu-be`.
+Guía mínima para trabajar el frontend de osiris-menu.
 
-## Qué construye este repo
+Este repo no tiene el OpenSpec principal. El OpenSpec canónico vive en el backend:
 
-Aplicación web responsive (PWA) que sirve:
+../osiris-menu-be/openspec/
 
-- **Tablet del Mesero**: gestión de comandas, layout del salón, atención al cliente.
-- **Tablet fija de cocina**: vista operativa de cocina, transiciones de estado de ítems.
-- **Tablet fija de barra**: vista operativa de barra, similar a cocina.
-- **Computadora de Cajero / Barman**: cobro, facturación, cierre de caja.
-- **Computadora de Admin Socio / Admin Contable**: dashboards, reportes, configuración.
-- **Sitio público QR del cliente**: carta digital, formulario de reservas.
+Antes de implementar cualquier vista, flujo o regla, leer en el backend:
 
-Un único código base React con vistas responsive y autorizaciones por rol. **Sin app móvil nativa.**
+../osiris-menu-be/openspec/project.md
+../osiris-menu-be/openspec/decisions.md
+../osiris-menu-be/openspec/glossary.md
+../osiris-menu-be/openspec/reference-specs/
 
-## Stack obligatorio
+No duplicar reglas de negocio en este archivo. No inventar reglas desde el frontend.
 
-- **Lenguaje**: TypeScript estricto (`strict: true` en tsconfig).
-- **Framework**: React 18+
-- **Build**: Vite
-- **Routing**: React Router
-- **Estado de servidor**: TanStack Query (React Query)
-- **Estado UI**: useState/useReducer locales. Si se necesita estado global, Zustand (no Redux).
-- **Estilos**: Tailwind CSS (utility-first). Componentes shadcn/ui como base.
-- **Forms**: React Hook Form + Zod para validación.
-- **WebSockets**: API nativa del navegador con un cliente wrapper propio.
-- **HTTP**: fetch nativo o `ky` si necesitamos retry/timeouts.
-- **Testing**: Vitest para unit, Playwright para e2e.
-- **Linter / formatter**: ESLint + Prettier configurados.
-- **Iconos**: lucide-react.
+Regla principal
 
-No introducir librerías nuevas sin justificación explícita.
+El frontend se construye simultáneamente con el backend desde el OpenSpec único de osiris-menu-be.
 
-## Restricciones técnicas críticas
+Si una regla no está clara:
 
-- **Sin localStorage para datos críticos**: la operación offline NO usa localStorage como backup principal. Datos críticos se sincronizan al backend siempre. Para los 50 cambios pendientes offline del Mesero (NFR-21-05), usar **IndexedDB** vía wrapper simple.
-- **PWA**: el frontend se instala como PWA solo como mejora de experiencia. **No habilita operación sin servidor**: el frontend siempre requiere conectividad a la red local del restaurante para hablar con el backend. Lo que llamamos "offline" en el sistema es "sin internet pero con red local funcional".
-- **Diseño responsive** obligatorio: misma base de código adapta a tablets de meseros (10"), tablets fijas (12-13"), computadoras de caja y admin, y móviles de clientes.
-- **Operación táctil**: todos los flujos operativos deben ser usables sin teclado físico. Botones grandes, bien separados, soportando manos mojadas o con guantes.
+1. No resolverla en componentes.
+2. Revisar OpenSpec.
+3. Si sigue ambigua, pedir decisión nueva D-XX.
+4. Solo implementar cuando el contrato esté claro.
 
-## Arquitectura física relevante
+Stack obligatorio
 
-- El backend corre en un servidor local dentro del restaurante. Frontend lo consume vía red local (WiFi segmentada).
-- Las tablets de meseros se autentican individualmente por usuario.
-- Las tablets fijas de cocina y barra operan en modo **kiosko** con PIN compartido entre operadores.
-- La computadora de caja es la misma máquina física que el servidor.
+Usar el mismo stack y estilo visual de osiris-inventario-fe:
 
-## Estructura del repo (a crear)
+* React 19
+* TypeScript estricto
+* Vite
+* React Router DOM 7
+* TanStack Query 5
+* Axios
+* Tailwind CSS 4
+* shadcn/ui sobre Radix UI
+* React Hook Form
+* Zod
+* lucide-react
+* date-fns
+* Recharts
+* Vitest
+* Testing Library
+* Playwright
+* Docker
+* Docker Compose
 
-```
-osiris-menu-fe/
-├── CLAUDE.md                      ← este archivo
-├── README.md
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-├── tailwind.config.ts
-├── index.html
-├── specs/                         ← copia de las specs relevantes del backend
-│   └── (sincronizadas desde osiris-menu-be/specs/)
-├── public/
-│   └── icons/
-├── src/
-│   ├── main.tsx
-│   ├── App.tsx
-│   ├── routes/                    ← React Router routes
-│   ├── views/                     ← vistas top-level por rol
-│   │   ├── mesero/                ← layout del salón, comanda activa
-│   │   ├── cocina/                ← vista operativa de cocina
-│   │   ├── barra/                 ← vista operativa de barra
-│   │   ├── caja/                  ← cobro, facturación
-│   │   ├── admin/                 ← dashboards, configuración
-│   │   └── publico/               ← carta QR, reservas web
-│   ├── modules/                   ← lógica por módulo de negocio
-│   │   ├── mesas/                 ← §20
-│   │   ├── comandas/              ← §21
-│   │   └── cocina-barra/          ← §22
-│   ├── components/                ← componentes UI compartidos
-│   │   └── ui/                    ← shadcn/ui components
-│   ├── hooks/                     ← hooks compartidos
-│   ├── api/                       ← cliente HTTP del backend
-│   ├── ws/                        ← cliente WebSocket
-│   ├── auth/                      ← contexto de autenticación
-│   ├── lib/                       ← utilidades, helpers
-│   └── types/                     ← tipos TypeScript del dominio
-└── tests/
-    ├── unit/
-    └── e2e/
-```
+No usar Redux, MobX, Material UI, Ant Design, Bootstrap, styled-components ni emotion.
 
-Cada módulo dentro de `src/modules/` tiene:
+Identidad visual
 
-```
+La UI debe sentirse como parte de la misma familia visual de Osiris Inventario.
+
+Reglas:
+
+* Interfaz limpia, moderna y elegante.
+* Evitar blanco puro y negro puro como base dominante.
+* Usar componentes reutilizables.
+* Mantener consistencia en botones, inputs, selects, modales, tablas, toasts y errores.
+* Formularios con React Hook Form + Zod.
+* Campos obligatorios con *.
+* Errores visibles, claros y accionables.
+* Acciones críticas con confirmación.
+* Operación táctil prioritaria para tablets.
+
+Docker
+
+Este frontend se levanta desde el docker-compose.yml raíz del workspace, no desde un compose propio.
+
+Comando principal desde la carpeta raíz:
+
+docker compose up --build
+
+URL local:
+
+http://localhost:5173
+
+Backend local:
+
+http://localhost:8000
+
+Variables permitidas:
+
+VITE_API_URL=http://localhost:8000
+VITE_API_PROXY_TARGET=http://api:8000
+
+Nunca poner secretos en variables VITE_*.
+
+Dockerfile esperado
+
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+ENV VITE_API_PROXY_TARGET=http://api:8000
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+
+Estructura recomendada
+
+src/
+├── main.tsx
+├── App.tsx
+├── routes/
+├── views/
+│   ├── mesero/
+│   ├── cocina/
+│   ├── barra/
+│   ├── caja/
+│   ├── admin/
+│   └── publico/
+├── modules/
+│   ├── mesas/
+│   ├── comandas/
+│   └── cocina-barra/
+├── components/
+│   └── ui/
+├── hooks/
+├── api/
+├── ws/
+├── auth/
+├── lib/
+└── types/
+
+Cada módulo:
+
 modules/<nombre>/
 ├── index.ts
-├── api.ts             ← llamadas al backend (TanStack Query hooks)
-├── ws.ts              ← suscripciones WebSocket del módulo
-├── types.ts           ← tipos TypeScript locales
-├── hooks/             ← hooks de dominio (ej. useMesaState)
-└── components/        ← componentes específicos del módulo
-```
+├── api.ts
+├── ws.ts
+├── types.ts
+├── hooks/
+└── components/
 
-## Principios no negociables
+Componentes reutilizables obligatorios
 
-Mismos 10 principios que el backend (ver Product Vision Parte I §7). Los que tienen impacto directo en el frontend:
+Centralizar en src/components/:
 
-- **Trazabilidad total**: cada acción del operador en la UI dispara un evento al backend con contexto suficiente para que el log del backend lo registre completo.
-- **Transparencia con el operador**: el operador siempre ve el estado real del sistema. Indicador semafórico de conectividad con backend visible permanentemente. Estado de cola, tiempos, alertas siempre presentes.
-- **Resiliencia operativa**: ante pérdida de conexión con el backend, la UI no rompe. Los últimos datos quedan visibles, los cambios pendientes se encolan en IndexedDB, y se reintentan al reconectar con idempotencia garantizada.
-- **Mínimo privilegio**: la UI esconde acciones que el rol del usuario no puede ejecutar. No depender solo de validación en backend.
+* Button
+* Input
+* Select
+* Textarea
+* Dialog
+* AlertDialog
+* Toast
+* DataTable
+* EmptyState
+* LoadingState
+* ErrorState
+* PageHeader
+* StatusBadge
+* ConnectivityIndicator
+* ConfirmActionDialog
 
-## Roles del sistema
+No duplicar componentes visuales por vista.
 
-Siete roles. La UI se adapta:
+API
 
-- **Super Admin** → acceso técnico, configuración avanzada.
-- **Admin Socio** → dashboards, autorizaciones nivel 4, gestión de empleados.
-- **Admin Contable** → gestión fiscal, reportes contables.
-- **Cajero / Barman** → vista de caja + vista operativa de barra.
-- **Mesero** → vista del salón, tablet portátil.
-- **Chef** → vista operativa de cocina (PIN compartido con Ayudante).
-- **Ayudante** → mismo PIN compartido con Chef.
+Todo HTTP pasa por src/api/.
 
-## Convenciones de código
+Usar Axios centralizado.
 
-- **TypeScript**: `strict: true`. Nada de `any` salvo justificado en línea con `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- razón`.
-- **Componentes React**: funcionales con hooks. No clases. Nombres en PascalCase.
-- **Hooks personalizados**: prefijo `use`. Un archivo por hook si es no trivial.
-- **Archivos**: kebab-case para archivos no-componente (`use-mesa-state.ts`). PascalCase para componentes (`MesaCard.tsx`).
-- **Tailwind**: utility-first. Solo abstraer a clase reutilizable cuando se repite 3+ veces. Componentes shadcn/ui como base estética.
-- **Forms**: siempre React Hook Form + Zod schema. No estado manual con useState para forms.
-- **Async**: usar TanStack Query para todo lo que viene del backend. No fetch directo en componentes.
-- **Imports**: organizados por: react → terceros → @/ aliases → relativos.
-- **Commits**: convencionales (`feat:`, `fix:`, `chore:`, `style:`, `test:`).
+Reglas:
 
-## Reglas de seguridad — no negociables
+* baseURL desde VITE_API_URL.
+* withCredentials si el backend usa cookie httpOnly.
+* No hacer fetch directo en componentes.
+* Errores normalizados.
+* TanStack Query para datos de servidor.
+* Mutations para escrituras.
+* Invalidar queries relacionadas después de mutaciones exitosas.
 
-- **NUNCA** poner credenciales, tokens, API keys en código ni en variables `VITE_*` que terminan en el bundle. Solo usar `VITE_*` para valores no sensibles (URL del backend, feature flags).
-- **NUNCA** usar `dangerouslySetInnerHTML` salvo con sanitización (DOMPurify) y razón documentada.
-- **NUNCA** loguear contraseñas, tokens, datos personales completos en consola.
-- **JWT / sesión**: el token de sesión vive en cookie httpOnly seteada por el backend. NO en localStorage. NO en sessionStorage.
-- **Validación**: todos los forms validan con Zod antes de submit. Backend revalida — la validación frontend es UX, no seguridad.
-- **CSP**: configurar Content Security Policy estricta en el servidor que sirve el frontend.
+WebSockets
 
-## WebSockets
+Todo WebSocket pasa por src/ws/.
 
-El backend emite eventos. El frontend se suscribe vía canales por contexto:
+Canales esperados:
 
-- Canal `mesas`: cambios de estado de mesa.
-- Canal `comandas:<comanda_id>`: cambios de la comanda específica abierta.
-- Canal `cocina`: ítems con ruteo cocina.
-- Canal `barra`: ítems con ruteo barra.
-- Canal `connectivity`: estado de conectividad con SRI (semáforo).
+* mesas
+* comandas:<comanda_id>
+* cocina
+* barra
+* connectivity
 
-Cliente WS personalizado en `src/ws/` con:
+El cliente debe soportar:
 
-- Reconexión automática con backoff exponencial.
-- Heartbeat.
-- Queue de eventos pendientes durante reconexión.
+* Reconexión automática.
+* Backoff exponencial.
+* Heartbeat.
+* Estado de conectividad visible.
+* Integración con TanStack Query.
+* Sin Socket.IO.
 
-## Cómo trabajar con las specs
+Offline operativo
 
-Las specs definitivas viven en `osiris-menu-be/specs/`. Para mantenerlas accesibles desde este repo:
+En este sistema, “offline” significa sin internet externo, pero con red local funcional.
 
-**Opción A (recomendada al inicio)**: copiar manualmente al iniciar sesiones de trabajo importantes. Hacer un script `scripts/sync-specs.sh` que sincronice desde un path local.
+Reglas:
 
-**Opción B**: cuando ambos repos estén en GitHub, usar submódulo git apuntando a `osiris-menu-be/specs/` o a un repo de specs separado.
+* No operar sin backend local.
+* No usar localStorage para datos críticos.
+* No guardar tokens en localStorage ni sessionStorage.
+* Para cola temporal del Mesero, usar IndexedDB con wrapper propio.
+* La tablet fija de cocina/barra no acepta transiciones durante pérdida de conexión con backend.
 
-Lo importante: el frontend **NO redefine reglas de negocio**. Solo las consume. Si una regla parece ambigua, leer la spec en backend o levantar issue.
+Seguridad
 
-## Cómo correr
+* Nunca guardar tokens en localStorage/sessionStorage.
+* Nunca exponer secretos en VITE_*.
+* Nunca loguear passwords, tokens ni datos personales completos.
+* No usar dangerouslySetInnerHTML salvo sanitización explícita.
+* La validación frontend es UX; backend revalida siempre.
+* La UI no decide permisos finales; backend es autoridad.
 
-```bash
-# Setup inicial (una vez)
-npm install
-cp .env.example .env.local        # configurar VITE_API_URL
+Testing
 
-# Desarrollo
-npm run dev                       # Vite dev server en :5173
+Comandos desde la raíz del workspace:
 
-# Tests
-npm run test                      # Vitest unit
-npm run test:e2e                  # Playwright e2e (necesita backend corriendo)
+docker compose exec web npm run lint
+docker compose exec web npm run test
+docker compose exec web npm run build
+docker compose exec web npm run test:e2e
 
-# Lint / format
-npm run lint
-npm run format
+Criterios de terminado
 
-# Build producción
-npm run build
-npm run preview                   # preview del build
-```
+Una vista o flujo está terminado solo si:
 
-## Cuándo invocar a Claude Code
+* Está respaldado por OpenSpec.
+* Usa terminología del glosario.
+* Usa componentes reutilizables.
+* Maneja loading, error, empty y success.
+* Tiene validación Zod si hay formulario.
+* Usa TanStack Query para datos del backend.
+* No duplica reglas de negocio.
+* Funciona dentro de Docker Compose.
+* Tiene tests cuando aplica.
 
-- Para una vista nueva: leer la spec del módulo backend correspondiente, luego pedir scaffolding de la vista.
-- Para un componente reutilizable: pedir variantes y estados (loading, error, empty) en el primer paso.
-- Para integrar un endpoint nuevo: pedir el hook de TanStack Query con manejo de error explícito.
-- Para WebSockets: pedir el canal con manejo de reconexión y test.
+Qué NO hacer
 
-## Qué NO hacer
-
-- No introducir Redux ni MobX. Si necesitas estado global, Zustand.
-- No instalar librerías UI completas (no Ant Design, no Material UI). Stack es Tailwind + shadcn/ui.
-- No usar CSS-in-JS runtime (styled-components, emotion).
-- No usar localStorage para datos críticos del negocio.
-- No depender de servicios cloud para la operación crítica de la app (analíticas, error tracking solo si self-hosted).
-- No mantener estado del servidor (datos del backend) en estado UI duplicado. Usar TanStack Query como única fuente de datos del servidor.
-
-## Comunicación con el backend
-
-- **Base URL**: `VITE_API_URL`, por defecto `http://localhost:8000` en dev.
-- **OpenAPI**: el backend genera schema OpenAPI. Considerar generar tipos TypeScript automáticos con `openapi-typescript` para mantener sincronía.
-- **Autenticación**: cookie httpOnly de sesión seteada al login. Frontend no maneja el token directamente.
-- **Errores**: el backend retorna errores estructurados (`{ error: { code, message, details? } }`). Cliente HTTP propaga estos errores como excepciones tipadas.
-
-## Glosario rápido
-
-Mismo glosario que backend. Términos canónicos:
-
-- **Tablet del Mesero**: dispositivo móvil 10" del personal de sala.
-- **Tablet fija de cocina / barra**: dispositivo 12-13" montado fijo.
-- **Vista operativa de cocina / barra**: vista del frontend filtrada por ruteo.
-- **Personal de cocina o barra**: Chef + Ayudante (cocina) o Barman (barra).
-
-Glosario extendido: `specs/00-base/glossary.md`.
+* No duplicar decisiones del backend.
+* No copiar specs completas al frontend.
+* No inventar reglas de negocio.
+* No usar fetch directo en componentes.
+* No crear estilos inconsistentes por pantalla.
+* No agregar librerías UI completas.
+* No usar Redux.
+* No crear Docker Compose propio como flujo principal.
+* No guardar información crítica en localStorage.
