@@ -23,6 +23,12 @@ describe("mesaFormSchema", () => {
     expect(mesaFormSchema.safeParse({ zona_id: UUID, numero_visible: "" }).success).toBe(false);
   });
 
+  it("rechaza capacidad 0 (capacidad positiva, REG-20-17)", () => {
+    expect(
+      mesaFormSchema.safeParse({ zona_id: UUID, numero_visible: "M1", capacidad: 0 }).success,
+    ).toBe(false);
+  });
+
   it("acepta entrada válida", () => {
     const parsed = mesaFormSchema.safeParse({
       zona_id: UUID,

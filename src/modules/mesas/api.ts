@@ -64,8 +64,13 @@ export async function generarQr(id: string): Promise<QrPayload> {
   return (await apiClient.post<QrPayload>(`${MESAS}/${id}/qr`)).data;
 }
 
-export async function bajaMesa(id: string): Promise<Mesa> {
+// Desactivar mesa = baja lógica (DELETE). La UI siempre la llama "Desactivar", no "Eliminar".
+export async function desactivarMesa(id: string): Promise<Mesa> {
   return (await apiClient.delete<Mesa>(`${MESAS}/${id}`)).data;
+}
+
+export async function reactivarMesa(id: string): Promise<Mesa> {
+  return (await apiClient.post<Mesa>(`${MESAS}/${id}/reactivar`)).data;
 }
 
 // ---- Grupos (unir / separar) ----

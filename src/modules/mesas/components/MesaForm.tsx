@@ -18,7 +18,7 @@ export function MesaForm({ zonaId, onSubmit, submitting }: MesaFormProps) {
     formState: { errors },
   } = useForm<MesaFormValues>({
     resolver: zodResolver(mesaFormSchema),
-    defaultValues: { zona_id: zonaId, capacidad: 0 },
+    defaultValues: { zona_id: zonaId, capacidad: 1 },
   });
 
   return (

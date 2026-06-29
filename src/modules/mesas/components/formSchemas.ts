@@ -12,8 +12,8 @@ export type ZonaFormValues = z.infer<typeof zonaFormSchema>;
 
 export const mesaFormSchema = z.object({
   zona_id: z.string().uuid("Zona inválida"),
-  numero_visible: z.string().min(1, "El número visible es obligatorio"),
-  capacidad: z.coerce.number().int("Debe ser entero").min(0, "No puede ser negativo").default(0),
+  numero_visible: z.string().trim().min(1, "El número visible es obligatorio"),
+  capacidad: z.coerce.number().int("Debe ser entero").min(1, "La capacidad debe ser al menos 1"),
 });
 
 export type MesaFormValues = z.infer<typeof mesaFormSchema>;

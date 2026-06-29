@@ -55,6 +55,16 @@ export function useMarcarLibre() {
   return useMutation({ mutationFn: api.marcarLibre, onSuccess: invalidate });
 }
 
+export function useDesactivarMesa() {
+  const invalidate = useInvalidate();
+  return useMutation({ mutationFn: api.desactivarMesa, onSuccess: invalidate });
+}
+
+export function useReactivarMesa() {
+  const invalidate = useInvalidate();
+  return useMutation({ mutationFn: api.reactivarMesa, onSuccess: invalidate });
+}
+
 export function useCrearGrupo() {
   const invalidate = useInvalidate();
   return useMutation({ mutationFn: api.crearGrupo, onSuccess: invalidate });

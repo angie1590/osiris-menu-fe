@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { PageHeader } from "./states";
+
 interface PlaceholderViewProps {
   title: string;
   description: string;
@@ -7,14 +9,13 @@ interface PlaceholderViewProps {
 }
 
 /**
- * Vista placeholder de scaffolding. Sin reglas de negocio: sólo consume el contrato del
- * backend en propuestas funcionales posteriores.
+ * Vista placeholder de scaffolding. Usa el `PageHeader` compartido para mantener el mismo
+ * patrón de encabezado que el resto del frontend. Sin reglas de negocio.
  */
 export function PlaceholderView({ title, description, children }: PlaceholderViewProps) {
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-bold">{title}</h1>
-      <p className="mt-2 text-slate-500">{description}</p>
+    <main className="mx-auto max-w-5xl p-8">
+      <PageHeader title={title} description={description} />
       {children}
     </main>
   );
